@@ -14,14 +14,31 @@ var connector = new builder.ChatConnector({
 server.post('/api/messages', connector.listen());
 
 var bot = new builder.UniversalBot(connector, function(session){
-    bot.dialog('proactiveDialog', function () {
-        session.send('bonjour');
+    // greet new user
+    bot.on('conversationUpdate', function (message) {
+        if (message.membersAdded) {
+            message.membersAdded.forEach(function (identity) {
+                if (identity.id !== message.address.bot.id) {
+                    bot.send(new builder.Message()
+                        .address(message.address)
+                        .text("Bonjour " + identity.name + "!" ));
+                }
+            });
+        }
     });
-
+    
+   
+    // detect user typing
     bot.on('typing', function(){
-        session.send('je te vois...');
+        session.send('je te vois...'); 
+        // bot typing
+        session.sendTyping();
+        setTimeout(function () {
+            session.send("Moi aussi je sais le faire!");
+        }, 5000);
     });
 
+    //response on all message
     session.send('ton message fait ' + session.message.text.length + ' caractères');
     //session.send('dialog data' + JSON.stringify(session.dialogData));
     //session.send('dialog session' + JSON.stringify(session.sessionState));
