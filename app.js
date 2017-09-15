@@ -29,22 +29,18 @@ var bot = new builder.UniversalBot(connector, function(session){
     });
 
     //recognize intent
-    bot.recognizer({recognize: function (context, done) {
-        var intent = { score: 0.0 };
-        if (context.message.text) {
-            switch (context.message.text.toLowerCase()) {
-                case 'doheavywork':
-                    intent = { score: 1.0, intent: 'doHeavyWork' };
-                    session.sendTyping();
-                    setTimeout(function () {
-                        session.send("travail terminé...");
-                    }, 5000);
-                    break;
-            }
-        }
-        done(null, intent);
-    }});    
-   
+    //bot.recognizer({recognize: function (context, done) {
+    //    var intent = { score: 0.0 };
+    //    if (context.message.text) {
+    //        switch (context.message.text.toLowerCase()) {
+    //            case 'doheavywork':
+    //                intent = { score: 1.0, intent: 'doHeavyWork' };
+    //                break;
+    //        }
+    //    }
+    //    done(null, intent);
+    //}});    
+
     // detect user typing
     bot.on('typing', function(){
         session.send('je te vois...'); 
@@ -52,13 +48,20 @@ var bot = new builder.UniversalBot(connector, function(session){
         session.sendTyping();
         setTimeout(function () {
             session.send("Moi aussi je sais le faire!");
-        }, 5000);
-
+        }, 3000);
     });
 
-    //response on all message
-    session.send('ton message fait ' + session.message.text.length + ' caractères');
-    //session.send('dialog data' + JSON.stringify(session.dialogData));
-    //session.send('dialog session' + JSON.stringify(session.sessionState));
-    
+    //do heavy work
+    if(session.message.text.toLowerCase() == 'doheavywork'){
+        session.send("du travail, encore du travail...");
+        session.sendTyping();
+        setTimeout(function () {
+            session.send("travail terminé...");
+        }, 3000);
+    }else{
+        //response on all message
+        session.send('ton message fait ' + session.message.text.length + ' caractères');
+        //session.send('dialog data' + JSON.stringify(session.dialogData));
+        //session.send('dialog session' + JSON.stringify(session.sessionState));
+    }
 });
