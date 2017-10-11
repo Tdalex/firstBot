@@ -17,7 +17,7 @@ var res = [];
 var bot = new builder.UniversalBot(connector, function(session){
     session.send("Hello");
     session.send("Bienvenue dans le Bot RESA");
-    session.beginDialog('menu');    
+    session.beginDialog('askName');         
 });
 
 bot.dialog('askName', [
@@ -27,19 +27,30 @@ bot.dialog('askName', [
     function (session, results){
         session.endDialog('Bonjour %s!', results.response);
         res['name'] = results.response;
-        session.beginDialog('askPhoner');
+        session.replaceDialog('askPhone');
     }
 ]);
 
 bot.dialog('askPhone', [
-    function (session) {
-        builder.Prompts.time(session, 'Quel est votre numero de telephone?');
+    function (session, args) {
+        if (args && args.reprompt) {
+            builder.Prompts.text(session, "Veuillez entrer un numero au format 06XXXXXXXX")
+        } else {
+            builder.Prompts.text(session, "Quel est votre numero?");
+        }
     },
-    function (session, results){    
-        session.endDialog('Votre numero est %s', results.response);
-        res['phone'] = results.response.entity;
-        session.beginDialog('askNumber'); }
-]);
+    function (session, results) {
+        var matched = results.response.match(/\d+/g);
+        var number  = matched ? matched.join('') : '';
+        if ((number.length == 10 || number.length == 11) && number.substring(0,2) == '06' ) {
+            session.endDialog('Votre numero est %s', number);
+            res['phone'] = number;
+            session.replaceDialog('askNumber'); 
+        } else {
+            session.replaceDialog('askPhone', { reprompt: true });
+        }
+    }
+]); 
 
 
 bot.dialog('askNumber', [
@@ -49,7 +60,7 @@ bot.dialog('askNumber', [
     function (session, results){
         session.endDialog('Vous avez reservé pour %s personnes', results.response.entity);
         res['number'] = results.response.entity;
-        session.beginDialog('askDate');
+        session.replaceDialog('askDate');
     }
 ]);
 
@@ -71,21 +82,43 @@ bot.dialog('menu', [
     function (session, results){
         switch(results.response.index){
             case 0: 
-                session.beginDialog('askName');
+                session.replaceDialog('askName');
             break;
             
             case 1: 
-                session.beginDialog('askNumber');
+                session.replaceDialog('askNumber');
             break;
 
             case 2: 
-                session.beginDialog('askDate');
+                session.replaceDialog('askDate');
             break;
             
             case 3: 
-                session.beginDialog('askPhone');
+                session.replaceDialog('askPhone');
             break;
         }
     }
-]);
+]).triggerAction({
+    matches      : /^main menu$/i,
+    confirmPrompt: "Voulez vous retourner dans le menu?"
+});
 
+bot.dialog('restart', [ 
+    function (session) {
+        res = [];
+        session.beginDialog('askName');   
+    } 
+]).triggerAction({
+    matches      : /^restart action$/i,
+    confirmPrompt: "Voulez vous recommencer votre reservation?"
+});
+
+bot.dialog('cancel', [ 
+    function (session) {
+        res = [];
+        session.beginDialog('askName');   
+    } 
+]).triggerAction({
+    matches      : /^cancel action$/i,
+    confirmPrompt: "Voulez vous annuler votre reservation?"
+});
