@@ -17,26 +17,17 @@ var res = [];
 var bot = new builder.UniversalBot(connector, function(session){
     session.send("Hello");
     session.send("Bienvenue dans le Bot RESA");
-    session.beginDialog('greetings');    
+    session.beginDialog('menu');    
 });
-
-bot.dialog('greetings',[
-    function (session){
-        session.beginDialog('askName');
-    },
-    function (session, results){
-        session.endDialog('Bonjour %s!', results.response);
-        res['name'] = results.response;
-        session.beginDialog('askNumber');
-    }
-]);
 
 bot.dialog('askName', [
     function (session) {
         builder.Prompts.text(session, 'Quel est votre nom?');
     },
     function (session, results){
-        session.endDialogWithResult(results);
+        session.endDialog('Bonjour %s!', results.response);
+        res['name'] = results.response;
+        session.beginDialog('askNumber');
     }
 ]);
 
@@ -61,3 +52,40 @@ bot.dialog('askDate', [
         session.send("Voici le detail de votre reservation:<br> nom: %s <br> date: %s <br> nombre de personnes: %s", res['name'], res['date'], res['number']);
     }
 ]);
+
+bot.dialog('askPhone', [
+    function (session) {
+        builder.Prompts.time(session, 'Quel est votre numero de telephone?');
+    },
+    function (session, results){
+        session.endDialog('Vous avez reservé pour le %s', builder.EntityRecognizer.resolveTime([results.response]));
+        res['date'] = builder.EntityRecognizer.resolveTime([results.response]);;
+        session.send("Voici le detail de votre reservation:<br> nom: %s <br> date: %s <br> nombre de personnes: %s", res['name'], res['date'], res['number']);
+    }
+]);
+
+bot.dialog('menu', [
+    function (session) {
+        builder.Prompts.choice(session, "Choisissez une etape", "nom|nombre de personnes|date|telephone", { listStyle: builder.ListStyle.button});
+    },
+    function (session, results){
+        switch(results.response.index){
+            case 0: 
+                session.beginDialog('askName');
+            break;
+            
+            case 1: 
+                session.beginDialog('askNumber');
+            break;
+
+            case 2: 
+                session.beginDialog('askDate');
+            break;
+            
+            case 3: 
+                session.beginDialog('askPhone');
+            break;
+        }
+    }
+]);
+
