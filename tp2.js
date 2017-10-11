@@ -27,9 +27,20 @@ bot.dialog('askName', [
     function (session, results){
         session.endDialog('Bonjour %s!', results.response);
         res['name'] = results.response;
-        session.beginDialog('askNumber');
+        session.beginDialog('askPhoner');
     }
 ]);
+
+bot.dialog('askPhone', [
+    function (session) {
+        builder.Prompts.time(session, 'Quel est votre numero de telephone?');
+    },
+    function (session, results){    
+        session.endDialog('Votre numero est %s', results.response);
+        res['phone'] = results.response.entity;
+        session.beginDialog('askNumber'); }
+]);
+
 
 bot.dialog('askNumber', [
     function (session) {
@@ -45,17 +56,6 @@ bot.dialog('askNumber', [
 bot.dialog('askDate', [
     function (session) {
         builder.Prompts.time(session, 'Quelle date?');
-    },
-    function (session, results){
-        session.endDialog('Vous avez reservé pour le %s', builder.EntityRecognizer.resolveTime([results.response]));
-        res['date'] = builder.EntityRecognizer.resolveTime([results.response]);;
-        session.send("Voici le detail de votre reservation:<br> nom: %s <br> date: %s <br> nombre de personnes: %s", res['name'], res['date'], res['number']);
-    }
-]);
-
-bot.dialog('askPhone', [
-    function (session) {
-        builder.Prompts.time(session, 'Quel est votre numero de telephone?');
     },
     function (session, results){
         session.endDialog('Vous avez reservé pour le %s', builder.EntityRecognizer.resolveTime([results.response]));
