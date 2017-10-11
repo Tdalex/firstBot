@@ -42,22 +42,22 @@ bot.dialog('askName', [
 
 bot.dialog('askNumber', [
     function (session) {
-        builder.Prompts.text(session, 'Combien de personnes?');
+        builder.Prompts.choice(session, "Combien de personnes?", "1|2|3", { listStyle: builder.ListStyle.button});
     },
     function (session, results){
-        session.endDialog('Vous avez reservé pour %s personnes', results.response);
-        res['number'] = results.response;
+        session.endDialog('Vous avez reservé pour %s personnes', results.response.entity);
+        res['number'] = results.response.entity;
         session.beginDialog('askDate');
     }
 ]);
 
 bot.dialog('askDate', [
     function (session) {
-        builder.Prompts.text(session, 'Quelle date?');
+        builder.Prompts.time(session, 'Quelle date?');
     },
     function (session, results){
-        session.endDialog('Vous avez reservé pour le %s', results.response);
-        res['date'] = results.response;
+        session.endDialog('Vous avez reservé pour le %s', builder.EntityRecognizer.resolveTime([results.response]));
+        res['date'] = builder.EntityRecognizer.resolveTime([results.response]);;
         session.send("Voici le detail de votre reservation:<br> nom: %s <br> date: %s <br> nombre de personnes: %s", res['name'], res['date'], res['number']);
     }
 ]);
