@@ -34,7 +34,7 @@ bot.dialog('askName', [
 bot.dialog('askPhone', [
     function (session, args) {
         if (args && args.reprompt) {
-            builder.Prompts.text(session, "Veuillez entrer un numero au format 06XXXXXXXX")
+            builder.Prompts.text(session, "Veuillez entrer un numero au format 06XXXXXXXX ou 07XXXXXXXX")
         } else {
             builder.Prompts.text(session, "Quel est votre numero?");
         }
@@ -42,7 +42,7 @@ bot.dialog('askPhone', [
     function (session, results) {
         var matched = results.response.match(/\d+/g);
         var number  = matched ? matched.join('') : '';
-        if ((number.length == 10 || number.length == 11) && number.substring(0,2) == '06' ) {
+        if (number.length == 10 && (number.substring(0,2) == '06' || number.substring(0,2) == '07') ) {
             session.endDialog('Votre numero est %s', number);
             res['phone'] = number;
             session.replaceDialog('askNumber'); 
