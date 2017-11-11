@@ -52,7 +52,6 @@ bot.dialog('askPhone', [
     }
 ]); 
 
-
 bot.dialog('askNumber', [
     function (session) {
         builder.Prompts.choice(session, "Combien de personnes?", "1|2|3", { listStyle: builder.ListStyle.button});
